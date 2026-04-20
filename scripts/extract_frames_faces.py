@@ -3,6 +3,8 @@ import cv2
 import csv
 import mediapipe as mp
 import os
+import time
+from tqdm import tqdm
 
 dataset_csv = "videos.csv"
 
@@ -25,6 +27,9 @@ with open(dataset_csv, "r") as f:
         if not capture.isOpened():
             print(f"Could not open video: {video_file}")
             continue
+            
+        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        pbar = tqdm(total=total_frames, desc=f"Processing {os.path.basename(video_file)}")
 
         frame_num = 0
         while True:
@@ -38,6 +43,7 @@ with open(dataset_csv, "r") as f:
 
             if not results.detections:
                 frame_num += 1
+                pbar.update(1)
                 continue
 
             # get bounding box coordinates
@@ -60,6 +66,7 @@ with open(dataset_csv, "r") as f:
             # skip invalid boxes
             if x2 <= x1 or y2 <= y1:
             	frame_num += 1
+                pbar.update(1)
             	continue
 
             # crop to face
@@ -68,10 +75,15 @@ with open(dataset_csv, "r") as f:
             # skip empty 
             if face_frame.size == 0:
             	frame_num += 1
+                pbar.update(1)
             	continue
 
             #resize for CNN
             face_frame = cv2.resize(face_frame, (224, 224))
+            frame_num += 1
+            pbar.update(1)
+            
+        pbar.close()
 
 
 #feed into CNN
