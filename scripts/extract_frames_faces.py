@@ -8,9 +8,6 @@ from tqdm import tqdm
 
 dataset_csv = "videos.csv"
 
-#folder for spatial dataset
-
-
 # initialize face detector 
 mp_face = mp.solutions.face_detection
 face_detector = mp_face.FaceDetection(model_selection=0, min_detection_confidence=0.5)
@@ -65,25 +62,23 @@ with open(dataset_csv, "r") as f:
 
             # skip invalid boxes
             if x2 <= x1 or y2 <= y1:
-            	frame_num += 1
+                frame_num += 1
                 pbar.update(1)
-            	continue
+                continue
 
             # crop to face
             face_frame = frame[y1:y2, x1:x2]
 
             # skip empty 
             if face_frame.size == 0:
-            	frame_num += 1
+                frame_num += 1
                 pbar.update(1)
-            	continue
+                continue
 
-            #resize for CNN
+            # resize for CNN
             face_frame = cv2.resize(face_frame, (224, 224))
+
             frame_num += 1
             pbar.update(1)
             
         pbar.close()
-
-
-#feed into CNN
