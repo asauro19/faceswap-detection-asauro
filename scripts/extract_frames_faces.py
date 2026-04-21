@@ -76,8 +76,6 @@ with open(dataset_csv, "r") as f:
                 pbar.update(1)
                 continue
 
-            # resize for CNN
-            face_frame = cv2.resize(face_frame, (224, 224))
 
             # create output folder
             video_name = os.path.splitext(os.path.basename(video_file))[0]
