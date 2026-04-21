@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-INPUT_DIR = "rgb_faces"
+INPUT_DIR = "spatial_faces"
 OUTPUT_DIR = "fft_faces"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -13,7 +13,7 @@ for label in os.listdir(INPUT_DIR):  # original / manipulated
     if not os.path.isdir(label_path):
         continue
 
-    for video_name in os.listdir(label_path):  # 000 / 000_003
+    for video_name in os.listdir(label_path):  
         video_path = os.path.join(label_path, video_name)
         if not os.path.isdir(video_path):
             continue
@@ -23,9 +23,7 @@ for label in os.listdir(INPUT_DIR):  # original / manipulated
 
         images = sorted(os.listdir(video_path))
 
-
         pbar = tqdm(images, desc=f"FFT {label}/{video_name}")
-    
 
         for img_file in pbar:
             img_path = os.path.join(video_path, img_file)
@@ -35,11 +33,10 @@ for label in os.listdir(INPUT_DIR):  # original / manipulated
             if img is None:
                 continue
 
-
+            # FFT
             f = np.fft.fft2(img)
             fshift = np.fft.fftshift(f)
             magnitude = np.log(np.abs(fshift) + 1)
-
 
             # normalize to 0–255
             magnitude = magnitude / magnitude.max() * 255
