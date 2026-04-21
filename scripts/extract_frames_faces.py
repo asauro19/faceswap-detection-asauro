@@ -19,6 +19,10 @@ with open(dataset_csv, "r") as f:
         video_file = entry["video_path"]
         label = entry["label"]
 
+        # TEMPORARY: only process 009.mp4
+        if "009.mp4" not in video_file:
+            continue
+
         capture = cv2.VideoCapture(video_file)
 
         if not capture.isOpened():
@@ -75,7 +79,6 @@ with open(dataset_csv, "r") as f:
                 frame_num += 1
                 pbar.update(1)
                 continue
-
 
             # create output folder
             video_name = os.path.splitext(os.path.basename(video_file))[0]
