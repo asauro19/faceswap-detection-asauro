@@ -7,7 +7,7 @@ from face_dataset import FaceDataset
 
 
 # load faces
-dataset = FaceDataset(/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces)  
+dataset = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces")  
 
 # train/test split (70/30)
 train_size = int(0.7 * len(dataset))
