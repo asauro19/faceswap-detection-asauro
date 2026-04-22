@@ -4,6 +4,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
 from torchvision import models
 from face_dataset import FaceDataset
+from tqdm import tqdm 
 
 
 # load faces
@@ -36,10 +37,12 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 epochs = 5
 
 for epoch in range(epochs):
+    print(f"\nEpoch {epoch+1}/{epochs}  (Remaining: {epochs - (epoch+1)})")
     model.train()
     running_loss = 0.0
 
-    for imgs, labels in train_loader:
+    # tqdm progress bar for batches
+    for imgs, labels in tqdm(train_loader, desc=f"Training Epoch {epoch+1}", ncols=100):
         imgs = imgs.to(device)
         labels = labels.to(device)
 
