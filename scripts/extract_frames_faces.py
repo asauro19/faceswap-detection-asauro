@@ -19,9 +19,6 @@ with open(dataset_csv, "r") as f:
         video_file = entry["video_path"]
         label = entry["label"]
 
-        # TEMPORARY: only process 009.mp4
-        if "009.mp4" not in video_file:
-            continue
 
         capture = cv2.VideoCapture(video_file)
 
