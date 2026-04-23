@@ -76,3 +76,12 @@ with torch.no_grad():
 
 accuracy = correct / total
 print(f"\nTest Accuracy: {accuracy:.4f}")
+
+#save lol
+torch.save({
+    "epoch": epochs,
+    "model_state_dict": model.state_dict(),
+    "optimizer_state_dict": optimizer.state_dict(),
+    "accuracy": accuracy, 
+}, "rgb_resnet18.pth")
+print("Model saved")
