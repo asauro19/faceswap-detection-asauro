@@ -22,7 +22,7 @@ for f in manipulated_vids:
     csv_rows.append([path, "manipulated"])
 
 #create csv file with videos labeled correctly
-with open("video_labels.csv", "w", newline="") as f:
+with open("videos.csv", "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["video_path", "label"])
     writer.writerows(csv_rows)
