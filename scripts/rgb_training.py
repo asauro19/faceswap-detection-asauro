@@ -4,16 +4,12 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import models
 from rgb_dataset import FaceDataset
-from split import make_faceforensics_splits
 from tqdm import tqdm 
 
-
-# load faces
-dataset = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces")  
-
-# official FaceForensics++ train/val/test split
-split_dir = "/home/adrianna/Downloads/faceswap-research/FaceForensics/dataset/splits"
-train_dataset, val_dataset, test_dataset = make_faceforensics_splits(dataset, split_dir)
+# load datasets directly from split folders
+train_dataset = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces/train")
+val_dataset   = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces/val")
+test_dataset  = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces/test")
 
 print("Train samples:", len(train_dataset))
 print("Val samples:", len(val_dataset))
@@ -23,29 +19,24 @@ print("Test samples:", len(test_dataset))
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-
 # load ResNet18
 model = models.resnet18(weights="IMAGENET1K_V1")
-model.fc = nn.Linear(model.fc.in_features, 2)  # binary classifier
+model.fc = nn.Linear(model.fc.in_features, 2)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
-
-# loss & optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
-
 
 # training 
 epochs = 5
 
 for epoch in range(epochs):
-    print(f"\nEpoch {epoch+1}/{epochs}  (Remaining: {epochs - (epoch+1)})")
+    print(f"\nEpoch {epoch+1}/{epochs}")
     model.train()
     running_loss = 0.0
 
-    # tqdm progress bar for batches
     for imgs, labels in tqdm(train_loader, desc=f"Training Epoch {epoch+1}", ncols=100):
         imgs = imgs.to(device)
         labels = labels.to(device)
@@ -60,9 +51,7 @@ for epoch in range(epochs):
 
     print(f"Epoch [{epoch+1}/{epochs}] Loss: {running_loss/len(train_loader):.4f}")
 
-
 # evaluation
-
 model.eval()
 correct = 0
 total = 0
@@ -81,11 +70,11 @@ with torch.no_grad():
 accuracy = correct / total
 print(f"\nTest Accuracy: {accuracy:.4f}")
 
-#save lol
 torch.save({
     "epoch": epochs,
     "model_state_dict": model.state_dict(),
     "optimizer_state_dict": optimizer.state_dict(),
-    "accuracy": accuracy, 
+    "accuracy": accuracy,
 }, "rgb_resnet18.pth")
+
 print("Model saved")
