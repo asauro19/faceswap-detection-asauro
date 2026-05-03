@@ -4,7 +4,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import models
 from rgb_dataset import FaceDataset
-from splits import make_faceforensics_splits
+from split import make_faceforensics_splits
 from tqdm import tqdm 
 
 
