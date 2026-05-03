@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 from torchvision import models
 from fft_dataset import FFTFaceDataset      
+from faceforensics_splits import make_faceforensics_splits
 from tqdm import tqdm 
 
 
@@ -12,10 +13,13 @@ dataset = FFTFaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-de
 
 
 
-# train/test split (70/30)
-train_size = int(0.7 * len(dataset))
-test_size = len(dataset) - train_size
-train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+# official FaceForensics++ train/val/test split
+split_dir = "/home/adrianna/Downloads/faceswap-research/FaceForensics/dataset/splits"
+train_dataset, val_dataset, test_dataset = make_faceforensics_splits(dataset, split_dir)
+
+print("Train samples:", len(train_dataset))
+print("Val samples:", len(val_dataset))
+print("Test samples:", len(test_dataset))
 
 # dataLoaders
 train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
