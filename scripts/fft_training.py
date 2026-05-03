@@ -7,9 +7,10 @@ from fft_dataset import FFTFaceDataset
 from tqdm import tqdm 
 
 # load FFT faces directly from split folders
-train_dataset = FFTFaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/fft_faces/train")
-val_dataset   = FFTFaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/fft_faces/val")
-test_dataset  = FFTFaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/fft_faces/test")
+train_dataset = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/train")
+val_dataset   = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/val")
+test_dataset  = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/test")
+
 
 print("Train samples:", len(train_dataset))
 print("Val samples:", len(val_dataset))
