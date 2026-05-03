@@ -1,93 +1,84 @@
-# spatial face extraction
 import cv2
 import csv
 import mediapipe as mp
 import os
 from tqdm import tqdm
+from split import make_splits
 
-dataset_csv = "videos.csv"
+# Load train/val/test video lists
+train_videos, val_videos, test_videos = make_splits("videos.csv")
 
-# initialize face detector 
+# MediaPipe face detector
 mp_face = mp.solutions.face_detection
 face_detector = mp_face.FaceDetection(model_selection=0, min_detection_confidence=0.5)
 
-# read CSV
-with open(dataset_csv, "r") as f:
-    label_reader = csv.DictReader(f)
+def extract_faces(video_list, split_name):
+    """
+    Extract faces ONLY from videos in the given split.
+    Saves to spatial_faces/<split_name>/<label>/<video_name>/
+    """
+    for video_file in video_list:
+        # Determine label from path
+        label = "original" if "original_sequences" in video_file else "manipulated"
 
-    for entry in label_reader:
-        video_file = entry["video_path"]
-        label = entry["label"]
-
-
+        # Open video
         capture = cv2.VideoCapture(video_file)
-
         if not capture.isOpened():
             print(f"Could not open video: {video_file}")
             continue
 
         total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        pbar = tqdm(total=total_frames, desc=f"Processing {os.path.basename(video_file)}")
+        pbar = tqdm(total=total_frames, desc=f"[{split_name}] {os.path.basename(video_file)}")
 
         frame_num = 0
+        video_name = os.path.splitext(os.path.basename(video_file))[0]
+
+        # Output folder
+        out_dir = os.path.join("spatial_faces", split_name, label, video_name)
+        os.makedirs(out_dir, exist_ok=True)
 
         while True:
             ret, frame = capture.read()
             if not ret:
                 break
 
-            # run MediaPipe Face Detection
+            # Run MediaPipe
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             results = face_detector.process(rgb_frame)
 
-            if not results.detections:
-                frame_num += 1
-                pbar.update(1)
-                continue
+            if results.detections:
+                det = results.detections[0]
+                bbox = det.location_data.relative_bounding_box
 
-            # get bounding box coordinates
-            detection = results.detections[0]
-            bbox = detection.location_data.relative_bounding_box
+                h, w, _ = frame.shape
+                x1 = int(bbox.xmin * w)
+                y1 = int(bbox.ymin * h)
+                x2 = int((bbox.xmin + bbox.width) * w)
+                y2 = int((bbox.ymin + bbox.height) * h)
 
-            h, w, _ = frame.shape
+                # Clamp
+                x1 = max(0, x1)
+                y1 = max(0, y1)
+                x2 = min(w, x2)
+                y2 = min(h, y2)
 
-            x1 = int(bbox.xmin * w)
-            y1 = int(bbox.ymin * h)
-            x2 = int((bbox.xmin + bbox.width) * w)
-            y2 = int((bbox.ymin + bbox.height) * h)
+                if x2 > x1 and y2 > y1:
+                    face_frame = frame[y1:y2, x1:x2]
 
-            # clamp
-            x1 = max(0, x1)
-            y1 = max(0, y1)
-            x2 = min(w, x2)
-            y2 = min(h, y2)
-
-            # skip invalid boxes
-            if x2 <= x1 or y2 <= y1:
-                frame_num += 1
-                pbar.update(1)
-                continue
-
-            # crop to face
-            face_frame = frame[y1:y2, x1:x2]
-
-            # skip empty
-            if face_frame.size == 0:
-                frame_num += 1
-                pbar.update(1)
-                continue
-
-            # create output folder
-            video_name = os.path.splitext(os.path.basename(video_file))[0]
-            out_dir = os.path.join("spatial_faces", label, video_name)
-            os.makedirs(out_dir, exist_ok=True)
-
-            # save face
-            out_path = os.path.join(out_dir, f"sface_{frame_num:04d}.jpg")
-            cv2.imwrite(out_path, face_frame)
+                    if face_frame.size > 0:
+                        out_path = os.path.join(out_dir, f"sface_{frame_num:04d}.jpg")
+                        cv2.imwrite(out_path, face_frame)
 
             frame_num += 1
             pbar.update(1)
 
         pbar.close()
         capture.release()
+
+
+# Run extraction for each split
+extract_faces(train_videos, "train")
+extract_faces(val_videos, "val")
+extract_faces(test_videos, "test")
+
+print("Spatial face extraction complete.")
