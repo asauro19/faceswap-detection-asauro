@@ -8,7 +8,7 @@ import os
 class FaceDataset(Dataset):
 
     def __init__(self, root_dir):
-        # root_dir = "spatial_faces"
+        # root_dir = "spatial_faces/train" or "spatial_faces/val" or "spatial_faces/test"
         self.root_dir = root_dir
         self.samples = []
 
