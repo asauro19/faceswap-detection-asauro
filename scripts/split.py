@@ -1,83 +1,41 @@
-import json
-import os
+import csv
+from sklearn.model_selection import train_test_split
 
-from torch.utils.data import Subset
+def make_splits(csv_path="videos.csv"):
+    """
+    Reads videos.csv and returns three lists:
+    - train_videos
+    - val_videos
+    - test_videos
 
+    Each list contains full video paths.
+    This ensures the split happens at the VIDEO LEVEL,
+    which prevents identity leakage and matches the methodology.
+    """
 
-def video_info(sample):
-    img_path, label = sample
-    video_name = os.path.basename(os.path.dirname(img_path))
-    label_name = os.path.basename(os.path.dirname(os.path.dirname(img_path)))
-    video_ids = os.path.splitext(video_name)[0].split("_")
+    videos = []
+    labels = []
 
-    if label_name == "original":
-        return label_name, video_ids[:1]
-    return label_name, video_ids[:2]
+    # Read CSV
+    with open(csv_path, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            videos.append(row["video_path"])
+            labels.append(row["label"])
 
-
-def load_split(split_dir, split_name):
-    with open(os.path.join(split_dir, f"{split_name}.json"), "r") as f:
-        pairs = json.load(f)
-
-    originals = set()
-    manipulated = set()
-
-    for a, b in pairs:
-        a = str(a).zfill(3)
-        b = str(b).zfill(3)
-
-        originals.add(a)
-        originals.add(b)
-        manipulated.add((a, b))
-        manipulated.add((b, a))
-
-    return originals, manipulated
-
-
-def split_indices(dataset, split_dir, split_name):
-    originals, manipulated = load_split(split_dir, split_name)
-    indices = []
-
-    for i, sample in enumerate(dataset.samples):
-        label_name, video_ids = video_info(sample)
-
-        if label_name == "original" and video_ids[0] in originals:
-            indices.append(i)
-        elif label_name == "manipulated" and tuple(video_ids[:2]) in manipulated:
-            indices.append(i)
-
-    return indices
-
-
-def make_faceforensics_splits(dataset, split_dir):
-    indices = {
-        "train": split_indices(dataset, split_dir, "train"),
-        "val": split_indices(dataset, split_dir, "val"),
-        "test": split_indices(dataset, split_dir, "test"),
-    }
-
-    for split_name, split_list in indices.items():
-        if len(split_list) == 0:
-            raise ValueError(
-                f"No samples found for {split_name} split. "
-                "Check that extracted folders use FaceForensics names like "
-                "original/071 and manipulated/071_054."
-            )
-
-    # Make sure no source video id appears in more than one split.
-    seen = {}
-    for split_name, split_list in indices.items():
-        for i in split_list:
-            _, video_ids = video_info(dataset.samples[i])
-            for video_id in video_ids:
-                if video_id in seen and seen[video_id] != split_name:
-                    raise ValueError(
-                        f"Video id {video_id} appears in both {seen[video_id]} and {split_name}"
-                    )
-                seen[video_id] = split_name
-
-    return (
-        Subset(dataset, indices["train"]),
-        Subset(dataset, indices["val"]),
-        Subset(dataset, indices["test"]),
+    # 70% train, 15% val, 15% test
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        videos, labels,
+        test_size=0.30,
+        stratify=labels,
+        random_state=42
     )
+
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp,
+        test_size=0.50,
+        stratify=y_temp,
+        random_state=42
+    )
+
+    return X_train, X_val, X_test
