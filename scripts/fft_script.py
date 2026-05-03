@@ -8,41 +8,41 @@ OUTPUT_DIR = "fft_faces"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-for label in os.listdir(INPUT_DIR):  # original / manipulated
-    label_path = os.path.join(INPUT_DIR, label)
-    if not os.path.isdir(label_path):
-        continue
+for split in ["train", "val", "test"]:
+    split_input = os.path.join(INPUT_DIR, split)
+    split_output = os.path.join(OUTPUT_DIR, split)
+    os.makedirs(split_output, exist_ok=True)
 
-    for video_name in os.listdir(label_path):  
-        video_path = os.path.join(label_path, video_name)
-        if not os.path.isdir(video_path):
+    for label in os.listdir(split_input):  # original / manipulated
+        label_path = os.path.join(split_input, label)
+        if not os.path.isdir(label_path):
             continue
 
-        out_dir = os.path.join(OUTPUT_DIR, label, video_name)
-        os.makedirs(out_dir, exist_ok=True)
-
-        images = sorted(os.listdir(video_path))
-
-        pbar = tqdm(images, desc=f"FFT {label}/{video_name}")
-
-        for img_file in pbar:
-            img_path = os.path.join(video_path, img_file)
-
-            # load grayscale image
-            img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-            if img is None:
+        for video_name in os.listdir(label_path):
+            video_path = os.path.join(label_path, video_name)
+            if not os.path.isdir(video_path):
                 continue
 
-            # FFT
-            f = np.fft.fft2(img)
-            fshift = np.fft.fftshift(f)
-            magnitude = np.log(np.abs(fshift) + 1)
+            out_dir = os.path.join(split_output, label, video_name)
+            os.makedirs(out_dir, exist_ok=True)
 
-            # normalize to 0–255
-            magnitude = magnitude / magnitude.max() * 255
-            magnitude = magnitude.astype(np.uint8)
+            images = sorted(os.listdir(video_path))
+            pbar = tqdm(images, desc=f"FFT {split}/{label}/{video_name}")
 
-            # save as fface_XXXX.jpg
-            out_file = img_file.replace("sface", "fface")
-            out_path = os.path.join(out_dir, out_file)
-            cv2.imwrite(out_path, magnitude)
+            for img_file in pbar:
+                img_path = os.path.join(video_path, img_file)
+
+                img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+                if img is None:
+                    continue
+
+                f = np.fft.fft2(img)
+                fshift = np.fft.fftshift(f)
+                magnitude = np.log(np.abs(fshift) + 1)
+
+                magnitude = magnitude / magnitude.max() * 255
+                magnitude = magnitude.astype(np.uint8)
+
+                out_file = img_file.replace("sface", "fface")
+                out_path = os.path.join(out_dir, out_file)
+                cv2.imwrite(out_path, magnitude)
