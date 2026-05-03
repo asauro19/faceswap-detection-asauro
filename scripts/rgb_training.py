@@ -7,9 +7,9 @@ from rgb_dataset import FaceDataset
 from tqdm import tqdm 
 
 # load datasets directly from split folders
-train_dataset = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces/train")
-val_dataset   = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces/val")
-test_dataset  = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/spatial_faces/test")
+train_dataset = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/train")
+val_dataset   = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/val")
+test_dataset  = FaceDataset("/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/test")
 
 print("Train samples:", len(train_dataset))
 print("Val samples:", len(val_dataset))
