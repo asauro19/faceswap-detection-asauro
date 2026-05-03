@@ -6,7 +6,7 @@ from tqdm import tqdm
 from split import make_splits
 
 # Load train/val/test video lists
-train_videos, val_videos, test_videos = make_splits("videos.csv")
+train_videos, val_videos, test_videos = make_splits("../videos.csv")
 
 # MediaPipe face detector
 mp_face = mp.solutions.face_detection
