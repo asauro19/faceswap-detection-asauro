@@ -5,7 +5,7 @@ import os
 from tqdm import tqdm
 from split import make_splits
 
-# Load train/val/test video lists
+# Load train/val/test video lists (CSV is one folder above /scripts)
 train_videos, val_videos, test_videos = make_splits("../videos.csv")
 
 # MediaPipe face detector
@@ -18,6 +18,10 @@ def extract_faces(video_list, split_name):
     Saves to spatial_faces/<split_name>/<label>/<video_name>/
     """
     for video_file in video_list:
+
+        # FIX: prepend ".." so paths point to project root, not /scripts/
+        video_file = os.path.join("..", video_file)
+
         # Determine label from path
         label = "original" if "original_sequences" in video_file else "manipulated"
 
