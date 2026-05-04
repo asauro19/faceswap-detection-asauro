@@ -15,11 +15,8 @@ from fft_dataset import FFTFaceDataset
 
 # 1. Load checkpoint 
 
-ckpt = torch.load(
-    "scripts/fft_resnet18.pth",
-    map_location="cpu",
-    weights_only=False   # REQUIRED for older checkpoints
-)
+ckpt = torch.load("scripts/fft_resnet18.pth", map_location="cpu", weights_only=False)
+
 
 print("Epoch trained:", ckpt["epoch"])
 print("Test accuracy saved:", ckpt["test_accuracy"])
