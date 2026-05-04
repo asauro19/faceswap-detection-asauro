@@ -5,12 +5,12 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 
-from fft_dataset import FFTFaceDataset   # your dataset class
+from fft_dataset import FFTFaceDataset  
 
 
-# -----------------------------
+
 # 1. Load checkpoint
-# -----------------------------
+
 ckpt = torch.load("fft_resnet18.pth", map_location="cpu")
 
 print("Epoch trained:", ckpt["epoch"])
@@ -18,9 +18,9 @@ print("Test accuracy saved:", ckpt["test_accuracy"])
 print("Confusion matrix saved:\n", ckpt["confusion_matrix"])
 
 
-# -----------------------------
+
 # 2. Rebuild the model
-# -----------------------------
+
 model = models.resnet18(weights="IMAGENET1K_V1")
 model.fc = nn.Linear(model.fc.in_features, 2)
 
@@ -31,9 +31,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
 
-# -----------------------------
+
 # 3. Load test dataset
-# -----------------------------
+
 test_dataset = FFTFaceDataset(
     "/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/test"
 )
@@ -41,9 +41,9 @@ test_dataset = FFTFaceDataset(
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
-# -----------------------------
+
 # 4. Run inference
-# -----------------------------
+
 all_preds = []
 all_labels = []
 
@@ -59,9 +59,9 @@ with torch.no_grad():
         all_labels.extend(labels.cpu().numpy())
 
 
-# -----------------------------
+
 # 5. Compute metrics
-# -----------------------------
+
 all_preds = np.array(all_preds)
 all_labels = np.array(all_labels)
 
