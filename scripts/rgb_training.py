@@ -16,8 +16,8 @@ print("Val samples:", len(val_dataset))
 print("Test samples:", len(test_dataset))
 
 # dataLoaders
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 # load ResNet18
 model = models.resnet18(weights="IMAGENET1K_V1")
