@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import torch
 import torch.nn as nn
 from torchvision import models
@@ -5,13 +9,17 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 
-from fft_dataset import FFTFaceDataset  
+from fft_dataset import FFTFaceDataset
 
 
 
-# 1. Load checkpoint
+# 1. Load checkpoint 
 
-ckpt = torch.load("fft_resnet18.pth", map_location="cpu")
+ckpt = torch.load(
+    "scripts/fft_resnet18.pth",
+    map_location="cpu",
+    weights_only=False   # REQUIRED for older checkpoints
+)
 
 print("Epoch trained:", ckpt["epoch"])
 print("Test accuracy saved:", ckpt["test_accuracy"])
@@ -35,7 +43,7 @@ model = model.to(device)
 # 3. Load test dataset
 
 test_dataset = FFTFaceDataset(
-    "/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/spatial_faces/test"
+    "/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/frequency_faces/test"
 )
 
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
@@ -77,4 +85,3 @@ print(cm)
 
 print("\n=== Classification Report ===")
 print(report)
-
