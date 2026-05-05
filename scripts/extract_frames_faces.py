@@ -19,7 +19,7 @@ def extract_faces(video_list, split_name):
     """
     for video_file in video_list:
 
-        # FIX: prepend ".." so paths point to project root, not /scripts/
+        
         video_file = os.path.join("..", video_file)
 
         # Determine label from path
