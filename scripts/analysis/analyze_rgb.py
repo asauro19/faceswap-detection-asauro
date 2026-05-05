@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, classification_report
 import numpy as np
 
-from rgb_dataset import RGBFaceDataset  
+from rgb_dataset import FaceDataset  
 
 
 
