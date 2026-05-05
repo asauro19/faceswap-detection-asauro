@@ -11,7 +11,7 @@ from rgb_dataset import FaceDataset
 
 # 1. Load checkpoint
 
-ckpt = torch.load("rgb_resnet18.pth", map_location="cpu")
+ckpt = torch.load("scripts/rgb_resnet18.pth", map_location="cpu")
 
 print("Epoch trained:", ckpt["epoch"])
 print("Test accuracy saved:", ckpt["test_accuracy"])
