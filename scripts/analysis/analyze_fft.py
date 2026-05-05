@@ -39,7 +39,7 @@ model = model.to(device)
 # 3. Load test dataset
 
 test_dataset = FFTFaceDataset(
-    "/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/frequency_faces/test"
+    "/home/adrianna/Downloads/faceswap-research/faceswap-detection-asauro/scripts/fft_faces/test"
 )
 
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
