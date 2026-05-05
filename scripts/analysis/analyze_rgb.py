@@ -18,7 +18,8 @@ print("Test accuracy saved:", ckpt["test_accuracy"])
 print("Confusion matrix saved:\n", ckpt["confusion_matrix"])
 
 
-# 2. Rebuild the model
+
+# 2. Rebuild the model (classification)
 
 model = models.resnet18(weights="IMAGENET1K_V1")
 model.fc = nn.Linear(model.fc.in_features, 2)
@@ -41,7 +42,7 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
 
-# 4. Run inference
+# 4. Run inference (classification)
 
 all_preds = []
 all_labels = []
@@ -69,3 +70,50 @@ cm = confusion_matrix(all_labels, all_preds)
 report = classification_report(all_labels, all_preds, digits=4)
 
 print("\n=== Recomputed Test Accuracy ===")
+print(acc)
+
+print("\n=== Confusion Matrix ===")
+print(cm)
+
+print("\n=== Classification Report ===")
+print(report)
+
+
+
+# ---------------------------------------------------------
+# 6. FEATURE VECTOR EXTRACTION (added section)
+# ---------------------------------------------------------
+
+print("\n=== Extracting 512‑dim RGB feature vectors ===")
+
+# Rebuild model with Identity head for embeddings
+feature_model = models.resnet18(weights="IMAGENET1K_V1")
+feature_model.fc = nn.Identity()   # <-- outputs 512‑dim features
+
+feature_model.load_state_dict(ckpt["model_state_dict"], strict=False)
+feature_model.eval()
+feature_model = feature_model.to(device)
+
+all_features = []
+all_labels_feat = []
+
+with torch.no_grad():
+    for imgs, labels in test_loader:
+        imgs = imgs.to(device)
+
+        feats = feature_model(imgs)      # shape: [batch, 512]
+        feats = feats.cpu().numpy()
+
+        all_features.append(feats)
+        all_labels_feat.append(labels.numpy())
+
+all_features = np.vstack(all_features)
+all_labels_feat = np.concatenate(all_labels_feat)
+
+print("RGB Feature matrix shape:", all_features.shape)
+print("Labels shape:", all_labels_feat.shape)
+
+np.save("rgb_features.npy", all_features)
+np.save("rgb_feature_labels.npy", all_labels_feat)
+
+print("Saved rgb_features.npy and rgb_feature_labels.npy")
