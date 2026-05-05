@@ -17,14 +17,13 @@ from fft_dataset import FFTFaceDataset
 
 ckpt = torch.load("scripts/fft_resnet18.pth", map_location="cpu", weights_only=False)
 
-
 print("Epoch trained:", ckpt["epoch"])
 print("Test accuracy saved:", ckpt["test_accuracy"])
 print("Confusion matrix saved:\n", ckpt["confusion_matrix"])
 
 
 
-# 2. Rebuild the model
+# 2. Rebuild the model (for classification first)
 
 model = models.resnet18(weights="IMAGENET1K_V1")
 model.fc = nn.Linear(model.fc.in_features, 2)
@@ -47,7 +46,7 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
 
-# 4. Run inference
+# 4. Run inference (classification)
 
 all_preds = []
 all_labels = []
@@ -82,3 +81,42 @@ print(cm)
 
 print("\n=== Classification Report ===")
 print(report)
+
+
+
+# 6. FEATURE VECTOR EXTRACTION
+
+
+print("\n=== Extracting 512‑dim feature vectors ===")
+
+# Rebuild model again but with Identity head
+feature_model = models.resnet18(weights="IMAGENET1K_V1")
+feature_model.fc = nn.Identity()   # <-- gives 512‑dim embeddings
+
+feature_model.load_state_dict(ckpt["model_state_dict"], strict=False)
+feature_model.eval()
+feature_model = feature_model.to(device)
+
+all_features = []
+all_labels_feat = []
+
+with torch.no_grad():
+    for imgs, labels in test_loader:
+        imgs = imgs.to(device)
+
+        feats = feature_model(imgs)      # shape: [batch, 512]
+        feats = feats.cpu().numpy()
+
+        all_features.append(feats)
+        all_labels_feat.append(labels.numpy())
+
+all_features = np.vstack(all_features)
+all_labels_feat = np.concatenate(all_labels_feat)
+
+print("Feature matrix shape:", all_features.shape)
+print("Labels shape:", all_labels_feat.shape)
+
+np.save("fft_features.npy", all_features)
+np.save("fft_feature_labels.npy", all_labels_feat)
+
+print("Saved fft_features.npy and fft_feature_labels.npy")
