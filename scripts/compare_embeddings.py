@@ -45,7 +45,8 @@ plt.xlabel("PC1")
 plt.ylabel("PC2")
 
 plt.tight_layout()
-plt.show()
+plt.savefig("embedding_spaces_pca.png", dpi=300)
+plt.close()
 
 
 
@@ -57,11 +58,15 @@ cos_sims = np.array([
     for i in range(len(rgb_feats))
 ])
 
+plt.figure(figsize=(8, 5))
 plt.hist(cos_sims, bins=50, color="purple")
 plt.title("Cosine Similarity Between RGB and FFT Embeddings")
 plt.xlabel("Cosine similarity")
 plt.ylabel("Frequency")
-plt.show()
+
+plt.tight_layout()
+plt.savefig("cosine_similarity_hist.png", dpi=300)
+plt.close()
 
 print("Mean cosine similarity:", cos_sims.mean())
 print("Median cosine similarity:", np.median(cos_sims))
